@@ -2,3 +2,4 @@ pip install spotipy
 pip install psutil
 pip install numpy
 pip install matplotlib
+pip install pandas

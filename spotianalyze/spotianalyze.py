@@ -1,13 +1,12 @@
-import csv
 import os
-import json
 import spotipy
 import spotipy.util as util
 from json.decoder import JSONDecodeError
-
 import numpy as np
 import matplotlib.pyplot as plt
-import helperfns as hlp
+import pandas as pd
+import second_layer as sl
+import time
 
 class Spotianalyze:
 ##################################################################################################################################
@@ -41,30 +40,25 @@ class Spotianalyze:
         return self.SPOTIFY_OBJECT
 
     
-##################################################################################################################################
-# Get csv of relevant data (song name, song artist(s), song id, features, times listened, times skipped) using dict
-    def create_csv(self, filename: str):
-        # Create list of all songs in library
-        song_list = hlp.get_library_song_list(self)
-        # Create list of dicts for each song and associated data
-        full_song_data = hlp.create_song_list_dict(self, song_list)
-        # Create csv file with given data
-        hlp.write_csv(full_song_data, filename)
-            
-
 
 
 spotianalyze = Spotianalyze('kyler4646', '4fd6158dd6e34661a9189a2cb2122445', 'ee472e4cf73743009fec5d6fb827a8c1', 'https://google.com/')
-# spotianalyze.create_csv('kyles_lib.csv')
-# hlp.read_csv("kyles_lib.csv")
-# tf = hlp.compare_csv_to_library(spotianalyze, "kyles_lib.csv")
-# print(hlp.get_currently_playing_data(spotianalyze))
-# _id = hlp.user_playlist_search(spotianalyze)
-# _dict = hlp.get_playlist_info_dict(spotianalyze, _id)
-# hlp.create_playlist_csv(spotianalyze, _id, _dict)
-_nparr = hlp.numpify("Vibe.csv")
-hlp.matplotlib_scatter_by_key(_nparr)
 
+# sl.create_liked_song_dataframe(spotianalyze)
+
+dataframe = pd.read_csv("data/liked_songs.csv")
+
+matrix = sl.numpyify(dataframe)
+
+print(np.std(matrix, axis=0))
+
+# sl.plt_histogram_by_key(matrix)
+
+# while True:
+#     current_data = sl.get_currently_playing_data(spotianalyze)
+#     print(current_data["name"])
+#     print(current_data["progress_ms"])
+#     time.sleep(0.1)
 
     # Fns to get current playing info in dict format
     # Fns to loop

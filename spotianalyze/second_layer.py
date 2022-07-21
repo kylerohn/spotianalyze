@@ -1,13 +1,14 @@
 import csv
+import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 import psutil
 import spotipy
-import numpy as np
-import matplotlib.pyplot as plt
 
 ####################################################################################################################
 
 ALBUM = "album"
+ARTIST = "artist"
 ARTISTS = "artists"
 AVAILABLE_MARKETS = "available_markets"
 CONTEXT = "context"
@@ -27,10 +28,12 @@ ITEMS = "items"
 NAME = "name"
 NEXT = "next"
 OWNER = "owner"
+PLAYLIST_URI = "playlist_uri"
 POPULARITY = "popularity"
 PREVIEW_URL = "preview_url"
 PROGRESS_MS = "progress_ms"
 SONG_INFO = "song_info"
+SPOTIFY = "spotify"
 TIME_ELAPSED = "time_elapsed"
 TIMES_LISTENED = "times_listened"
 TIMES_SKIPPED = "times_skipped"
@@ -41,6 +44,7 @@ TRACK_NUMBER = "track_number"
 TRACK_URI = "track_uri"
 TYPE = "type"
 URI = "uri"
+URL = "url"
 
 ####################################################################################################################
 
@@ -76,68 +80,172 @@ KEYLIST = [
 ####################################################################################################################
 # Data Creation
 ####################################################################################################################
-# Create list of all songs in library
-def get_library_song_list(spotianalyze_object):
-    spotify_object = spotianalyze_object.SPOTIFY_OBJECT
-    song_list = []
-    page = 1
-    while (
-        len(
-            spotify_object.current_user_saved_tracks(
-                limit=1, offset=(page - 1)
-            )["items"]
-        )
-        != 0
-    ):
-        temp_song_list = spotianalyze_object.SPOTIFY_OBJECT.current_user_saved_tracks(
-            limit=1, offset=(page - 1)
-        )["items"]
-        song_list = song_list + temp_song_list
-        page = page + 1
+# Create DataFrame objects of retreived data (Songs/Features and Artists) and save as CSV files
+def create_liked_song_dataframe(spotianalyze_object):
 
-    song_list
+    # Create Spotify Object
+    spotify_object = spotianalyze_object.SPOTIFY_OBJECT
+
+    # Iteration Var
+    page = 1
+
+    # Local Vars Declaration for Song Info
+    song_names = []
+    song_ids = []
+    durations_in_ms = []
+    song_urls = []
+    artists = []
+
+    # Local Vars Declaration for Artist Info
+    artist_names = []
+    artist_ids = []
+    artist_hrefs = []
+    artist_urls = []
+
+    # Get Most Recently Liked Song
+    current_track = spotify_object.current_user_saved_tracks(limit=1, offset=(page - 1))
+
+    # Loop Through All Liked Songs
+    while True:
+        # Add name and duration to respective lists
+        song_names.append(current_track[ITEMS][0][TRACK][NAME])
+        song_ids.append(current_track[ITEMS][0][TRACK][ID])
+        durations_in_ms.append(current_track[ITEMS][0][TRACK][DURATION_MS])
+        song_urls.append(current_track[ITEMS][0][TRACK][EXTERNAL_URLS][SPOTIFY])
+        artist_list = current_track[ITEMS][0][TRACK][ARTISTS]
+
+        # Print Progress
+        print(song_names[-1], end=" | ")
+        print(f"{((len(song_names)/current_track[TOTAL])*100):.2f}%")
+
+        # Create Dict of Each Artist in Song
+        for artist in artist_list:
+            # Create List of Values
+            values = [
+                artist[NAME],
+                artist[ID],
+                artist[HREF],
+                artist[EXTERNAL_URLS][SPOTIFY],
+            ]
+
+            # Create List of Keys
+            keys = [NAME, ID, HREF, EXTERNAL_URLS]
+
+            # See Dictify
+            artist_info = dictify(values, keys)
+
+            # Add to Artist List if Not Added Already
+            if artist_info in artists:
+                continue
+            else:
+                artists.append(artist_info)
+
+        # End Loop if End of List
+        if not current_track[NEXT]:
+            break
+
+        # Iterate to next song
+        page += 1
+        current_track = spotify_object.current_user_saved_tracks(
+            limit=1, offset=(page - 1)
+        )
+
+    # Create Dataframe for Artists and Respective Info
+    for artist in artists:
+        artist_names.append(artist[NAME])
+        artist_ids.append(artist[ID])
+        artist_hrefs.append(artist[HREF])
+        artist_urls.append(artist[EXTERNAL_URLS])
+    artist_dataframe = pd.DataFrame(
+        {NAME: artist_names, ID: artist_ids, HREF: artist_hrefs, URL: artist_urls}
+    )
+
+    # Create CSV file of artist data
+    artist_dataframe.to_csv("data/liked_songs_artists.csv")
+
+    # Create Dataframe and CSV file for Songs
+    song_dataframe = pd.DataFrame(
+        {NAME: song_names, ID: song_ids, DURATION_MS: durations_in_ms, URL: song_urls}
+    )
+
+    feature_dict = get_feature_dict(spotianalyze_object, song_dataframe)
+    feature_dataframe = pd.DataFrame(feature_dict)
+    song_dataframe = pd.concat([song_dataframe, feature_dataframe], axis=1)
+    song_dataframe.to_csv("data/liked_songs.csv")
+
+    # Output Completed
+    return True
 
 
 ####################################################################################################################
-# Create list of dicts for each song and associated data
-# TODO Pandasify
-def create_song_list_dict(spotianalyze_object, song_list):
+# Get Features for Song by ID as Dict from DataFrame
+def get_feature_dict(spotianalyze_object, song_dataframe=pd.DataFrame()):
+
+    # Local Vars Declaration for Song Features
+    danceability = []
+    energy = []
+    key = []
+    loudness = []
+    speechiness = []
+    acousticness = []
+    instrumentalness = []
+    liveness = []
+    valence = []
+    tempo = []
+
+    # Create Spotify Object
     spotify_object = spotianalyze_object.SPOTIFY_OBJECT
-    it = 1
-    full_song_data = []
 
-    for track in song_list:
-        # Display Progress
-        print(f"{(it/len(song_list)) * 100}%", end=" ")
-        print("RAM memory % used:", psutil.virtual_memory()[2])
+    # Get Shape of Dataframe input
+    rows, cols = song_dataframe.shape
 
-        # Iteration Reqs
-        it = it + 1
-        track_uri = track[TRACK][ID]
-        track_features = spotianalyze_object.SPOTIFY_OBJECT.audio_features(track_uri)
-        # Dict Creation
-        full_dict = {
-            NAME: track[TRACK][NAME],
-            ARTISTS: track[TRACK][ARTISTS],
-            ID: track_uri,
-            DURATION_MS: track[TRACK][DURATION_MS],
-            DANCEABILITY: track_features[0][DANCEABILITY],
-            ENERGY: track_features[0][ENERGY],
-            KEY: track_features[0][KEY],
-            LOUDNESS: track_features[0][LOUDNESS],
-            SPEECHINESS: track_features[0][SPEECHINESS],
-            INSTRUMENTALNESS: track_features[0][INSTRUMENTALNESS],
-            ACOUSTICNESS: track_features[0][ACOUSTICNESS],
-            LIVENESS: track_features[0][LIVENESS],
-            VALENCE: track_features[0][VALENCE],
-            TEMPO: track_features[0][TEMPO],
-            TIME_SIGNATURE: track_features[0][TIME_SIGNATURE],
-            TIMES_LISTENED: 0,
-            TIMES_SKIPPED: 0,
-        }
-        full_song_data.append(full_dict)
-    print(len(full_song_data))
-    return full_song_data
+    # Iterate through Each ID and Append Values to Associated List
+    for row in range(rows):
+        current_id = song_dataframe.at[row, ID]
+        track_features = spotify_object.audio_features(current_id)
+        danceability.append(track_features[0][DANCEABILITY])
+        energy.append(track_features[0][ENERGY])
+        key.append(track_features[0][KEY])
+        loudness.append(track_features[0][LOUDNESS])
+        speechiness.append(track_features[0][SPEECHINESS])
+        acousticness.append(track_features[0][ACOUSTICNESS])
+        instrumentalness.append(track_features[0][INSTRUMENTALNESS])
+        liveness.append(track_features[0][LIVENESS])
+        valence.append(track_features[0][VALENCE])
+        tempo.append(track_features[0][TEMPO])
+
+        print(f"Progress: {((row/rows)*100):.2f}%")
+
+    feature_dict = {
+        DANCEABILITY: danceability,
+        ENERGY: energy,
+        KEY: key,
+        LOUDNESS: loudness,
+        SPEECHINESS: speechiness,
+        ACOUSTICNESS: acousticness,
+        INSTRUMENTALNESS: instrumentalness,
+        LIVENESS: liveness,
+        VALENCE: valence,
+        TEMPO: tempo,
+        TIMES_LISTENED: 0,
+        TIMES_SKIPPED: 0,
+    }
+
+    return feature_dict
+
+
+####################################################################################################################
+# Creates Dictionary with list of values, and list of key value pairs
+def dictify(values: list(), keys: list()):
+
+    dictionary = {}
+    if len(values) != len(keys):
+        return -1
+
+    for idx, key in enumerate(keys):
+        dictionary[key] = values[idx]
+
+    return dictionary
 
 
 ####################################################################################################################
@@ -147,30 +255,22 @@ def create_song_list_dict(spotianalyze_object, song_list):
 def get_currently_playing_data(spotianalyze_object):
     spotify_object = spotianalyze_object.SPOTIFY_OBJECT
 
-    name = spotianalyze_object.SPOTIFY_OBJECT.current_user_playing_track()[ITEM][NAME]
-    artists = spotianalyze_object.SPOTIFY_OBJECT.current_user_playing_track()[ITEM][
-        ARTISTS
-    ]
-    duration = spotianalyze_object.SPOTIFY_OBJECT.current_user_playing_track()[ITEM][
-        DURATION_MS
-    ]
-    track_id = spotianalyze_object.SPOTIFY_OBJECT.current_user_playing_track()[ITEM][ID]
+    playlist_uri = None
 
-    context = spotianalyze_object.SPOTIFY_OBJECT.current_user_playing_track()[CONTEXT][
-        TYPE
-    ]
+    raw_json = spotify_object.current_user_playing_track()
+
+    name = raw_json[ITEM][NAME]
+    artists = raw_json[ITEM][ARTISTS]
+    duration = raw_json[ITEM][DURATION_MS]
+    track_id = raw_json[ITEM][ID]
+
+    context = raw_json[CONTEXT][TYPE]
     if context == "playlist":
-        playlist_uri = spotianalyze_object.SPOTIFY_OBJECT.current_user_playing_track()[
-            CONTEXT
-        ][URI]
-    progress = spotianalyze_object.SPOTIFY_OBJECT.current_user_playing_track()[
-        PROGRESS_MS
-    ]
-    is_playing = spotianalyze_object.SPOTIFY_OBJECT.current_user_playing_track()[
-        IS_PLAYING
-    ]
+        playlist_uri = raw_json[CONTEXT][URI]
+    progress = raw_json[PROGRESS_MS]
+    is_playing = raw_json[IS_PLAYING]
 
-    track_features = spotianalyze_object.SPOTIFY_OBJECT.audio_features(track_id)
+    track_features = spotify_object.audio_features(track_id)
 
     current_playing_data = {
         NAME: name,
@@ -180,6 +280,7 @@ def get_currently_playing_data(spotianalyze_object):
         CONTEXT: context,
         PROGRESS_MS: progress,
         IS_PLAYING: is_playing,
+        PLAYLIST_URI: playlist_uri,
         DANCEABILITY: track_features[0][DANCEABILITY],
         ENERGY: track_features[0][ENERGY],
         KEY: track_features[0][KEY],
@@ -196,16 +297,55 @@ def get_currently_playing_data(spotianalyze_object):
 
 
 ####################################################################################################################
+# TODO Data Manipulation/Visualizaton
+####################################################################################################################
+# Create Numpy Array With Given Dictionary Using Pandas
+def numpyify(dataframe=pd.DataFrame()):
+
+    rows, cols = dataframe.shape
+
+    data_numpy_sorted = np.empty((rows, len(KEYLIST)), dtype=float)
+
+    for col, key in enumerate(KEYLIST):
+        for row in range(rows):
+            data_numpy_sorted[row, col] = float(dataframe.at[row, key])
+
+    return data_numpy_sorted
+
+
+# !ONLY COMPLETE UNTIL HERE
+####################################################################################################################
+# TODO Create MATPLOTLIB Graphs of Data Given Dictionaries
+
+def plt_histogram_by_key(numpy_matrix):
+
+    for idx, k in enumerate(KEYLIST):
+        plt.hist(numpy_matrix.transpose()[:][idx])
+        plt.gca().set(title=k, ylabel="Frequency")
+        plt.show()
+
+
+
+
+####################################################################################################################
 # TODO Playlist Stuff
 ####################################################################################################################
 # User Playlist Search/Selection
+# TODO bro fix the numbers ffs
 def user_playlist_search(spotianalyze_object):
+
+    # Local Var Declaration for List of User Created Playlist
+    playlist_list = []
+
     spotify_object = spotianalyze_object.SPOTIFY_OBJECT
-    current_user = spotianalyze_object.SPOTIFY_OBJECT.current_user()
-    playlists = spotianalyze_object.SPOTIFY_OBJECT.current_user_playlists()
+    current_user = spotify_object.current_user()
+    playlists = spotify_object.current_user_playlists()
     for idx, playlist in enumerate(playlists[ITEMS]):
         if playlists[ITEMS][idx][OWNER][DISPLAY_NAME] == current_user[DISPLAY_NAME]:
-            print(f"{idx + 1}: {playlist[NAME]}")
+            playlist_list.append(playlist)
+
+    for idx, playlist in enumerate(playlist_list):
+        print(f"{idx + 1}: {playlist[NAME]}")
 
     print("Type the Playlist Number You Want to Analyze: ", end=" ")
     idx = int(input())
@@ -296,52 +436,10 @@ def create_playlist_csv(spotianalyze_object, playlist_id, playlist_item_list):
 # TODO Remove Song from User Playlist
 
 
-####################################################################################################################
-# TODO Numpy Shenanigans ...with pandas...
-####################################################################################################################
-# TODO Create Numpy Array With Given Dictionary Using Pandas
-def numpify(csvfile: str):
-    spotify_object = spotianalyze_object.SPOTIFY_OBJECT
-    song_info = read_csv(csvfile)
-    feature_array = np.zeros((len(KEYLIST), len(song_info)))
-    for idx1, key in enumerate(KEYLIST):
-        for idx2, song_feature_items in enumerate(song_info):
-            feature_array[idx1][idx2] = song_feature_items[key]
-
-    return feature_array
-
-
 ###################################################################################################################
 # Library Manipulation
 ####################################################################################################################
-# Add song to Library
-# TODO Make Work With Multiple Songs
-def add_song_to_library(spotianalyze_object, current_playing_data, csvfile):
-    spotify_object = spotianalyze_object.SPOTIFY_OBJECT
-    spotianalyze_object.SPOTIFY_OBJECT.current_user_saved_tracks_add(
-        current_playing_data[ID]
-    )
-    old_data = read_csv(csvfile)
-    additional_data = [
-        {
-            NAME: current_playing_data[NAME],
-            ARTISTS: current_playing_data[ARTISTS],
-            ID: current_playing_data[ID],
-            DANCEABILITY: current_playing_data[DANCEABILITY],
-            ENERGY: current_playing_data[ENERGY],
-            KEY: current_playing_data[KEY],
-            LOUDNESS: current_playing_data[LOUDNESS],
-            SPEECHINESS: current_playing_data[SPEECHINESS],
-            INSTRUMENTALNESS: current_playing_data[INSTRUMENTALNESS],
-            ACOUSTICNESS: current_playing_data[ACOUSTICNESS],
-            LIVENESS: current_playing_data[LIVENESS],
-            VALENCE: current_playing_data[VALENCE],
-            TEMPO: current_playing_data[TEMPO],
-        }
-    ]
-
-    write_csv(additional_data + old_data)
-
+# TODO Add song to Library
 
 ####################################################################################################################
 # TODO Remove song from library
@@ -469,11 +567,3 @@ def tempo_range(csvfile: str, start=0.0, stop=250.0):
                 print(row)
 
 
-# TODO Create MATPLOTLIB Graphs of Data Given Dictionaries
-
-
-def matplotlib_scatter_by_key(numpy_matrix):
-    for idx, k in enumerate(KEYLIST):
-        plt.hist(numpy_matrix[:][idx], bins=100)
-        plt.gca().set(title=k, ylabel="Frequency")
-        plt.show()
