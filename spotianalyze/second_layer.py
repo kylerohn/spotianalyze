@@ -27,6 +27,7 @@ ITEM = "item"
 ITEMS = "items"
 NAME = "name"
 NEXT = "next"
+OFFSET = "offset"
 OWNER = "owner"
 PLAYLIST_URI = "playlist_uri"
 POPULARITY = "popularity"
@@ -81,7 +82,7 @@ KEYLIST = [
 # Data Creation
 ####################################################################################################################
 # Create DataFrame objects of retreived data (Songs/Features and Artists) and save as CSV files
-def create_liked_song_dataframe(spotianalyze_object):
+def create_liked_songs_dataframe(spotianalyze_object):
 
     # Create Spotify Object
     spotify_object = spotianalyze_object.SPOTIFY_OBJECT
@@ -103,7 +104,7 @@ def create_liked_song_dataframe(spotianalyze_object):
     artist_urls = []
 
     # Get Most Recently Liked Song
-    current_track = spotify_object.current_user_saved_tracks(limit=1, offset=(page - 1))
+    current_track = spotify_object.current_user_saved_tracks(limit=1, offset=(page - 1), fields=ITEMS)
 
     # Loop Through All Liked Songs
     while True:
@@ -176,6 +177,53 @@ def create_liked_song_dataframe(spotianalyze_object):
     # Output Completed
     return True
 
+####################################################################################################################
+# Create DataFrame objects of given playlist id items
+def create_playlist_songs_dataframe(spotianalyze_object, playlist_id):
+
+    # Local Vars Declaration for Song Info
+    song_names = []
+    song_ids = []
+    durations_in_ms = []
+    song_urls = []
+
+    # Create Spotify Object
+    spotify_object = spotianalyze_object.SPOTIFY_OBJECT
+
+    # Create Playlist Object
+    playlist_data = spotify_object.playlist(playlist_id)
+    current_track = playlist_data[TRACKS]
+    name = playlist_data[NAME]
+    while True:
+        for idx, song in enumerate(current_track[ITEMS]):
+            # Add name and duration to respective lists
+            song_names.append(song[TRACK][NAME])
+            song_ids.append(song[TRACK][ID])
+            durations_in_ms.append(song[TRACK][DURATION_MS])
+            song_urls.append(song[TRACK][EXTERNAL_URLS][SPOTIFY])
+            print(song_names[idx])
+
+            # Pretty Print
+            print(f"{(idx + 1) + (current_track[OFFSET])}: {song[TRACK][NAME]} | {((len(song_names)/current_track[TOTAL])*100):.2f}%")
+
+        # Check for Next Page
+        if current_track[NEXT]:
+            current_track = spotify_object.next(current_track)
+        else:
+            break
+
+    # Create Dataframe and CSV file for Songs
+    song_dataframe = pd.DataFrame(
+        {NAME: song_names, ID: song_ids, DURATION_MS: durations_in_ms, URL: song_urls}
+    )
+
+    feature_dict = get_feature_dict(spotianalyze_object, song_dataframe)
+    feature_dataframe = pd.DataFrame(feature_dict)
+    song_dataframe = pd.concat([song_dataframe, feature_dataframe], axis=1)
+    song_dataframe.to_csv(f"data/{name}.csv")
+
+    # Output Completed
+    return True
 
 ####################################################################################################################
 # Get Features for Song by ID as Dict from DataFrame
@@ -214,7 +262,7 @@ def get_feature_dict(spotianalyze_object, song_dataframe=pd.DataFrame()):
         valence.append(track_features[0][VALENCE])
         tempo.append(track_features[0][TEMPO])
 
-        print(f"Progress: {((row/rows)*100):.2f}%")
+        print(f"Progress: {(((row + 1)/rows)*100):.2f}%")
 
     feature_dict = {
         DANCEABILITY: danceability,
@@ -313,17 +361,14 @@ def numpyify(dataframe=pd.DataFrame()):
     return data_numpy_sorted
 
 
-# !ONLY COMPLETE UNTIL HERE
 ####################################################################################################################
-# TODO Create MATPLOTLIB Graphs of Data Given Dictionaries
-
+# Create MATPLOTLIB Graphs of Data Given np matrix
 def plt_histogram_by_key(numpy_matrix):
 
     for idx, k in enumerate(KEYLIST):
-        plt.hist(numpy_matrix.transpose()[:][idx])
+        plt.hist(numpy_matrix.transpose()[:][idx], snap=True)
         plt.gca().set(title=k, ylabel="Frequency")
         plt.show()
-
 
 
 
@@ -331,7 +376,6 @@ def plt_histogram_by_key(numpy_matrix):
 # TODO Playlist Stuff
 ####################################################################################################################
 # User Playlist Search/Selection
-# TODO bro fix the numbers ffs
 def user_playlist_search(spotianalyze_object):
 
     # Local Var Declaration for List of User Created Playlist
@@ -349,92 +393,20 @@ def user_playlist_search(spotianalyze_object):
 
     print("Type the Playlist Number You Want to Analyze: ", end=" ")
     idx = int(input())
-    return playlists[ITEMS][idx - 1][ID]
+    return (playlist_list[idx - 1][ID])
 
 
+
+
+
+
+
+# !ONLY COMPLETE UNTIL HERE
 ####################################################################################################################
-# TODO User Playlist Data Collection Pandasfied
-def get_playlist_info_dict(spotianalyze_object, playlist_id):
-    spotify_object = spotianalyze_object.SPOTIFY_OBJECT
-    playlist_items_dict = {}
-    playlist_items_list = []
-    playlist_items = spotianalyze_object.SPOTIFY_OBJECT.playlist_items(
-        playlist_id, limit=20
-    )
-    for song in playlist_items[ITEMS]:
-        track_features = spotianalyze_object.SPOTIFY_OBJECT.audio_features(
-            song[TRACK][ID]
-        )
-        playlist_items_dict = {
-            NAME: song[TRACK][NAME],
-            ARTISTS: song[TRACK][ARTISTS],
-            DURATION_MS: song[TRACK][DURATION_MS],
-            ID: song[TRACK][ID],
-            IS_LOCAL: song[IS_LOCAL],
-            DANCEABILITY: track_features[0][DANCEABILITY],
-            ENERGY: track_features[0][ENERGY],
-            KEY: track_features[0][KEY],
-            LOUDNESS: track_features[0][LOUDNESS],
-            SPEECHINESS: track_features[0][SPEECHINESS],
-            INSTRUMENTALNESS: track_features[0][INSTRUMENTALNESS],
-            ACOUSTICNESS: track_features[0][ACOUSTICNESS],
-            LIVENESS: track_features[0][LIVENESS],
-            VALENCE: track_features[0][VALENCE],
-            TEMPO: track_features[0][TEMPO],
-        }
-        playlist_items_list.append(playlist_items_dict)
-
-    while playlist_items[NEXT]:
-        playlist_items = spotianalyze_object.SPOTIFY_OBJECT.next(playlist_items)
-        for song in playlist_items[ITEMS]:
-            track_features = spotianalyze_object.SPOTIFY_OBJECT.audio_features(
-                song[TRACK][ID]
-            )
-            playlist_items_dict = {
-                NAME: song[TRACK][NAME],
-                ARTISTS: song[TRACK][ARTISTS],
-                DURATION_MS: song[TRACK][DURATION_MS],
-                ID: song[TRACK][ID],
-                IS_LOCAL: song[IS_LOCAL],
-                DANCEABILITY: track_features[0][DANCEABILITY],
-                ENERGY: track_features[0][ENERGY],
-                KEY: track_features[0][KEY],
-                LOUDNESS: track_features[0][LOUDNESS],
-                SPEECHINESS: track_features[0][SPEECHINESS],
-                INSTRUMENTALNESS: track_features[0][INSTRUMENTALNESS],
-                ACOUSTICNESS: track_features[0][ACOUSTICNESS],
-                LIVENESS: track_features[0][LIVENESS],
-                VALENCE: track_features[0][VALENCE],
-                TEMPO: track_features[0][TEMPO],
-            }
-            playlist_items_list.append(playlist_items_dict)
-    return playlist_items_list
-
-
-# TODO Create Playlist csv file -- PANDAS
-def create_playlist_csv(spotianalyze_object, playlist_id, playlist_item_list):
-    spotify_object = spotianalyze_object.SPOTIFY_OBJECT
-    current_user = spotianalyze_object.SPOTIFY_OBJECT.current_user()
-    playlists = spotianalyze_object.SPOTIFY_OBJECT.current_user_playlists()
-    for playlist in playlists[ITEMS]:
-        print(playlist[ID])
-        print(playlist_id)
-        if (playlist[ID] == playlist_id) and (
-            playlist[OWNER][DISPLAY_NAME] == current_user[DISPLAY_NAME]
-        ):
-            filename = playlist[NAME]
-            write_csv(playlist_item_list, filename[0:4] + ".csv")
-            return True
-        else:
-            continue
-
-    return False
-
 
 # TODO Playlist Search by Keyword
 # TODO Add Song to User Playlist
 # TODO Remove Song from User Playlist
-
 
 ###################################################################################################################
 # Library Manipulation

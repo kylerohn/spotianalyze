@@ -44,13 +44,18 @@ class Spotianalyze:
 
 spotianalyze = Spotianalyze('kyler4646', '4fd6158dd6e34661a9189a2cb2122445', 'ee472e4cf73743009fec5d6fb827a8c1', 'https://google.com/')
 
-# sl.create_liked_song_dataframe(spotianalyze)
+playlist_id = sl.user_playlist_search(spotianalyze)
+sl.create_playlist_songs_dataframe(spotianalyze, playlist_id)
 
-dataframe = pd.read_csv("data/liked_songs.csv")
 
-matrix = sl.numpyify(dataframe)
 
-print(np.std(matrix, axis=0))
+
+
+# sl.create_liked_songs_dataframe(spotianalyze)
+
+# dataframe = pd.read_csv("data/liked_songs.csv")
+
+# matrix = sl.numpyify(dataframe)
 
 # sl.plt_histogram_by_key(matrix)
 
