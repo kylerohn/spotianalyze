@@ -1,4 +1,5 @@
 class CONST:
+    # Constants 
     ALBUM = "album"
     ADDED_AT = "added_at"
     ARTIST = "artist"
@@ -9,6 +10,7 @@ class CONST:
     ARTIST_URLS = "artist_urls"
     AVAILABLE_MARKETS = "available_markets"
     CONTEXT = "context"
+    CLEANSED = "cleansed.csv"
     DISC_NUMBER = "disc_number"
     DISPLAY_NAME = "display_name"
     DURATION = "duration"

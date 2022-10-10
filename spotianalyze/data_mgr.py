@@ -6,23 +6,33 @@ from math import e
 from math import pow
 from math import sqrt
 
-
+########################################################################################################################################################################################
 # Create Numpy Array With Given Dictionary Using Pandas
 def numpyify(dataframe=pd.DataFrame()):
+    '''
+    Turn a dataframe into a numpy array, but my way, not pandas way
+    '''
 
+    # Get dataframe shape
     rows, cols = dataframe.shape
 
+    # Initialize numpy array
     data_numpy_sorted = np.empty((rows, len(CONST.KEYLIST)), dtype=float)
 
+    # Convert Data
     for col, key in enumerate(CONST.KEYLIST):
         for row in range(rows):
             data_numpy_sorted[row, col] = float(dataframe.at[row, key])
 
+    # Return
     return data_numpy_sorted.transpose()
 
-
+########################################################################################################################################################################################
 def clean_song_data(song_data, relevant_data):
-    # Local Vars Declaration for Song Info
+    '''
+    Get Relevant information from each song given a returned
+    value from spotify, for later analysis
+    '''
 
     # Name
     relevant_data[CONST.SONG_NAMES].append(
@@ -45,9 +55,12 @@ def clean_song_data(song_data, relevant_data):
 
     return relevant_data
 
-
+########################################################################################################################################################################################
 # Get Songs by Range of Danceibility
 def dance_range(a: float, b: float, df_csv="data/liked_songs.csv"):
+    '''
+    Get Songs by Range of Danceability
+    '''
     liked_df = pd.read_csv(df_csv)
     final_ids = []
 
@@ -57,9 +70,11 @@ def dance_range(a: float, b: float, df_csv="data/liked_songs.csv"):
             final_ids.append(song_id)
             print(song)
 
-
 # Get Songs by Range of Energy
 def energy_range(a: float, b: float, df_csv="data/liked_songs.csv"):
+    '''
+    Get Songs by Range of Enegy
+    '''
     liked_df = pd.read_csv(df_csv)
     final_ids = []
 
@@ -71,6 +86,9 @@ def energy_range(a: float, b: float, df_csv="data/liked_songs.csv"):
 
 # Get Songs by Range of Loudness
 def loudness_range(a: float, b: float, df_csv="data/liked_songs.csv"):
+    '''
+    Get Songs by Range of Loudness
+    '''
     liked_df = pd.read_csv(df_csv)
     final_ids = []
 
@@ -82,6 +100,9 @@ def loudness_range(a: float, b: float, df_csv="data/liked_songs.csv"):
 
 # Get Songs by Range of Speechiness
 def speechiness_range(a: float, b: float, df_csv="data/liked_songs.csv"):
+    '''
+    Get Songs by Range of Speechiness
+    '''
     liked_df = pd.read_csv(df_csv)
     final_ids = []
 
@@ -93,6 +114,9 @@ def speechiness_range(a: float, b: float, df_csv="data/liked_songs.csv"):
 
 # Get Songs by Range of acousticness
 def acousticness_range(a: float, b: float, df_csv="data/liked_songs.csv"):
+    '''
+    Get Songs by Range of Acousticness
+    '''
     liked_df = pd.read_csv(df_csv)
     final_ids = []
 
@@ -104,6 +128,9 @@ def acousticness_range(a: float, b: float, df_csv="data/liked_songs.csv"):
 
 # Get Songs by Range of Instrumentalness
 def instrumentalness_range(a: float, b: float, df_csv="data/liked_songs.csv"):
+    '''
+    Get Songs by Range of Instrumentalness
+    '''
     liked_df = pd.read_csv(df_csv)
     final_ids = []
 
@@ -115,6 +142,9 @@ def instrumentalness_range(a: float, b: float, df_csv="data/liked_songs.csv"):
 
 # Get Songs by Range of Liveness
 def liveness_range(a: float, b: float, df_csv="data/liked_songs.csv"):
+    '''
+    Get Songs by Range of Liveness
+    '''
     liked_df = pd.read_csv(df_csv)
     final_ids = []
 
@@ -126,6 +156,9 @@ def liveness_range(a: float, b: float, df_csv="data/liked_songs.csv"):
 
 # Get Songs by Range of Valence
 def valence_range(a: float, b: float, df_csv="data/liked_songs.csv"):
+    '''
+    Get Songs by Range of Valence
+    '''
     liked_df = pd.read_csv(df_csv)
     final_ids = []
 
@@ -137,6 +170,9 @@ def valence_range(a: float, b: float, df_csv="data/liked_songs.csv"):
 
 # Get Songs by Range of Tempo
 def tempo_range(a: float, b: float, df_csv="data/liked_songs.csv"):
+    '''
+    Get Songs by Range of Tempo
+    '''
     liked_df = pd.read_csv(df_csv)
     final_ids = []
 
@@ -147,7 +183,10 @@ def tempo_range(a: float, b: float, df_csv="data/liked_songs.csv"):
     return final_ids
 
 # Get Songs by Range of Key
-def key_range(a: float, b: float, df_csv="data/liked_songs.csv"):
+def key_range(a: int, b: int, df_csv="data/liked_songs.csv"):
+    '''
+    Get Songs by Range of Key
+    '''
     liked_df = pd.read_csv(df_csv)
     final_ids = []
 
@@ -157,10 +196,14 @@ def key_range(a: float, b: float, df_csv="data/liked_songs.csv"):
 
     return final_ids
 
-
+########################################################################################################################################################################################
 def prob_density(x: np.array, mu: float, sigma: float):
+    '''
+    Probability Density function
+    '''
     y = []
     for xn in x:
         y.append((1/sigma * sqrt(2*pi)) * pow(e, (-0.5) * pow((xn-mu)/sigma, 2)))
     y = np.array(y)
     return y
+

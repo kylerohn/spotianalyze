@@ -5,6 +5,9 @@ import pandas as pd
 ####################################################################################################################
 # User Playlist Search/Selection
 def user_playlist_search(spotianalyze_object):
+    '''
+    Search for playlists owned by user to make a selection
+    '''
 
     # Local Var Declaration for List of User Created Playlist
     playlist_list = []
@@ -13,8 +16,8 @@ def user_playlist_search(spotianalyze_object):
     current_user = spotify_object.current_user()
     playlists = spotify_object.current_user_playlists()
     for idx, playlist in enumerate(playlists[CONST.ITEMS]):
-        if playlists[CONST.ITEMS][idx][CONST.OWNER][CONST.DISPLAY_NAME] == current_user[CONST.DISPLAY_NAME]:
-            playlist_list.append(playlist)
+        # if playlists[CONST.ITEMS][idx][CONST.OWNER][CONST.DISPLAY_NAME] == current_user[CONST.DISPLAY_NAME]:
+        playlist_list.append(playlist)
 
     for idx, playlist in enumerate(playlist_list):
         print(f"{idx + 1}: {playlist[CONST.NAME]}")
@@ -69,7 +72,7 @@ def create_playlist_songs_dataframe(spotianalyze_object, playlist_id):
     feature_dict = sft.get_feature_dict(spotianalyze_object, song_dataframe)
     feature_dataframe = pd.DataFrame(feature_dict)
     song_dataframe = pd.concat([song_dataframe, feature_dataframe], axis=1)
-    song_dataframe.to_csv(f"data/playlists/{name}.csv")
+    song_dataframe.to_csv(f"data/playlists/{playlist_id}/{name}.csv")
 
     # Output Completed
     return True

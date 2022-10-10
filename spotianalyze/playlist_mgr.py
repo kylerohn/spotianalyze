@@ -1,4 +1,3 @@
-from typing import List
 import pandas as pd
 from const import CONST
 
@@ -18,7 +17,7 @@ def create_playlist(spotianalyze_object, playlist_name):
     
     return info[CONST.ID]
 
-def add_to(spotianalyze_object, playlist_id, songs):
+def add_to(spotianalyze_object, playlist_id, songs: list()):
 
     spotify_object = spotianalyze_object.SPOTIFY_OBJECT
     playlist_id = str(playlist_id)

@@ -3,6 +3,8 @@ from const import CONST
 import numpy as np
 import pandas as pd
 import data_mgr as dmgr
+import playlist_data as plydat
+import spotianalyze
 
 colors_set = np.array(["orange","purple","beige","brown","gray","cyan","magenta","red","green","blue","yellow","pink"])
 
@@ -49,7 +51,7 @@ def plt_all(x, y, z_list, idx=0):
     plt_all(x, y, z_list, idx=idx+1)
 
 
-def plt_all_norm(x_all, idx=0):
+def plt_normal_dist(x_all, idx=0):
     if idx == len(CONST.KEYLIST):
         return 0
 
@@ -63,6 +65,8 @@ def plt_all_norm(x_all, idx=0):
     y = dmgr.prob_density(x, mu, sigma)
     ax.plot(x, y)
     plt.title(CONST.KEYLIST[idx])
+    plt.savefig(f"results/wavy/adjusted/{CONST.KEYLIST[idx]}.png")
     idx+=1
-    plt_all_norm(x_all, idx)
+    plt_normal_dist(x_all, idx)
     plt.show()
+
