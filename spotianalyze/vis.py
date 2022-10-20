@@ -65,8 +65,7 @@ def plt_normal_dist(x_all, idx=0):
     y = dmgr.prob_density(x, mu, sigma)
     ax.plot(x, y)
     plt.title(CONST.KEYLIST[idx])
-    plt.savefig(f"results/wavy/adjusted/{CONST.KEYLIST[idx]}.png")
+    plt.savefig(f"results/sharif/original/{CONST.KEYLIST[idx]}.png")
     idx+=1
     plt_normal_dist(x_all, idx)
-    plt.show()
 

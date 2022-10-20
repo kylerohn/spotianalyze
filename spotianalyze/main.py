@@ -17,7 +17,7 @@ wavy = Playlist()
 dat_np = data_mgr.numpyify(pd.read_csv(f"data/playlists/{wavy.id}/{wavy.name}.csv"))
 attr_val_list = []
 
-c= 1.5
+c= 1.55
 
 for idx, attr in enumerate(CONST.KEYLIST):
     attr_val_list.append(((np.median(dat_np[:][idx]))-(np.std(dat_np[:][idx])*c), (np.median(dat_np[:][idx])+(np.std(dat_np[:][idx])*c)), attr))
@@ -74,7 +74,7 @@ print(len(new_song_list))
 
 input()
 
-new_id = playlist_mgr.create_playlist(spotify, "adam recs 1.5")
+new_id = playlist_mgr.create_playlist(spotify, f"quintin recs {c}")
 playlist_mgr.add_to(spotify, new_id, new_song_list)
 
 
