@@ -19,6 +19,7 @@ class CONST:
     EXPLICIT = "explicit"
     EXTERNAL_IDS = "external_ids"
     EXTERNAL_URLS = "external_urls"
+    GENRES = "genres"
     HREF = "href"
     ID = "id"
     IS_LOCAL = "is_local"
