@@ -6,7 +6,6 @@ import playlist_mgr as pmgr
 import os
 import spotipy
 import spotipy.util as util
-from sklearn.cluster import KMeans
 from json.decoder import JSONDecodeError
 import numpy as np
 import matplotlib.pyplot as plt
