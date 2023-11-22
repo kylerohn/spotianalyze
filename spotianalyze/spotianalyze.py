@@ -1,69 +1,31 @@
-import csv
+
+import vis
+import data_mgr as dmgr
+from const import CONST
+import playlist_mgr as pmgr
 import os
-import json
 import spotipy
 import spotipy.util as util
+from sklearn.cluster import KMeans
 from json.decoder import JSONDecodeError
-import psutil
 import numpy as np
 import matplotlib.pyplot as plt
+import pandas as pd
+import playlist_data as pldat
+
+
 
 class Spotianalyze:
-
-    # Class Vars
-    ALBUM = 'album'
-    ARTISTS = 'artists'
-    AVAILABLE_MARKETS = 'available_markets'
-    DISC_NUMBER = 'disc_number'
-    DURATION = 'duration'
-    DURATION_MS = 'duration_ms'
-    EXPLICIT = 'explicit'
-    EXTERNAL_IDS = 'external_ids'
-    EXTERNAL_URLS = 'external_urls'
-    HREF = 'href'
-    ID = 'id'
-    IS_LOCAL = 'is_local'
-    ITEM = 'item'
-    ITEMS = 'items'
-    NAME = 'name'
-    POPULARITY = 'popularity'
-    PREVIEW_URL = 'preview_url'
-    PROGRESS_MS = 'progress_ms'
-    SONG_INFO = 'song_info'
-    SONG_FEATURES = 'song_features'
-    TIME_ELAPSED = 'time_elapsed'
-    TIMES_LISTENED = 'times_listened'
-    TIMES_SKIPPED = 'times_skipped'
-    TOTAL = 'total'
-    TRACK = 'track'
-    TRACK_NUMBER = 'track_number'
-    TRACK_URI = 'track_uri'
-    TYPE = 'type'
-    URI = 'uri'
-
     ##################################################################################################################################
 
+    # Welcome to Spotianalyze
 
-    DANCEABILITY = 'danceability'
-    ENERGY = 'energy'
-    KEY = 'key'
-    LOUDNESS = 'loudness'
-    MODE = 'mode'
-    SPEECHINESS = 'speechiness'
-    ACOUSTICNESS = 'acousticness'
-    INSTRUMENTALNESS = 'instrumentalness'
-    LIVENESS = 'liveness'
-    VALENCE = 'valence'
-    TEMPO = 'tempo'
-    TRACK_HREF = 'track_href'
-    ANALYSIS_URL = 'analysis_url'
-    TIME_SIGNATURE = 'time_signature'
-
-    KEYLIST = [DANCEABILITY, ENERGY, KEY, LOUDNESS, SPEECHINESS, ACOUSTICNESS, INSTRUMENTALNESS, LIVENESS, VALENCE, TEMPO, TIME_SIGNATURE]
-
-##################################################################################################################################
-# Initialize User 
+    ##################################################################################################################################
+    # Initialize User
     def __init__(self, username: str, client_id: str, client_secret: str, redirect_uri: str):
+        '''
+        Authentication for Spotify API
+        '''
 
         self.USERNAME = username
         self.CLIENT_ID = client_id
@@ -74,10 +36,10 @@ class Spotianalyze:
         os.environ['SPOTIPY_CLIENT_SECRET'] = client_secret
         os.environ['SPOTIPY_REDIRECT_URI'] = redirect_uri
 
-        scope = 'user-read-private user-read-playback-state playlist-modify-public user-library-modify user-library-read'
+        scope = 'user-read-private user-read-playback-state playlist-modify-public user-library-modify user-library-read playlist-read-private playlist-modify-private'
         try:
             token = util.prompt_for_user_token(username, scope)
-        except(AttributeError, JSONDecodeError):
+        except (AttributeError, JSONDecodeError):
             os.remove(f".cache-{username}")
             token = util.prompt_for_user_token(username, scope)
         spotify_object = spotipy.Spotify(auth=token)
@@ -86,7 +48,6 @@ class Spotianalyze:
 
     def __repr__(self):
         return self.SPOTIFY_OBJECT
-
     
 ##################################################################################################################################
 # Get csv of relevant data (song name, song artist(s), song id, features, times listened, times skipped) using dict
@@ -154,3 +115,7 @@ print(spotianalyze.create_csv('kyles_lib.csv'))
     # Create way to extract data easily
     # Use that data to do stuff
     
+##################################################################################################################################
+
+
+
