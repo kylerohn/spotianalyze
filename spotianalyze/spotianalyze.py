@@ -11,6 +11,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 import playlist_data as pldat
+import csv
 
 
 
@@ -31,22 +32,31 @@ class Spotianalyze:
         self.CLIENT_SECRET = client_secret
         self.REDIERECT_URI = redirect_uri
 
+        #add client id, client secret, and redirect uri into the environment variables to be accessed by spotipy
         os.environ['SPOTIPY_CLIENT_ID'] = client_id
         os.environ['SPOTIPY_CLIENT_SECRET'] = client_secret
         os.environ['SPOTIPY_REDIRECT_URI'] = redirect_uri
 
-        scope = 'user-read-private user-read-playback-state playlist-modify-public user-library-modify user-library-read playlist-read-private playlist-modify-private'
+
+        # define scopes of data in which are allowed to be accessed
+        scope = """
+                user-read-private 
+                user-read-playback-state 
+                playlist-modify-public 
+                user-library-modify 
+                user-library-read 
+                playlist-read-private 
+                playlist-modify-private
+                """
+        # 
         try:
             token = util.prompt_for_user_token(username, scope)
         except (AttributeError, JSONDecodeError):
             os.remove(f".cache-{username}")
             token = util.prompt_for_user_token(username, scope)
-        spotify_object = spotipy.Spotify(auth=token)
-        user = spotify_object.current_user()
-        self.SPOTIFY_OBJECT = spotify_object
-
-    def __repr__(self):
-        return self.SPOTIFY_OBJECT
+        self._spotify_object = spotipy.Spotify(auth=token)
+        
+    
     
 ##################################################################################################################################
 # Get csv of relevant data (song name, song artist(s), song id, features, times listened, times skipped) using dict
@@ -67,7 +77,6 @@ class Spotianalyze:
         for track in song_list:
             # Display Progress
             print(f"{(it/len(song_list)) * 100}%", end=' ')
-            print('RAM memory % used:', psutil.virtual_memory()[2])
 
             # Iteration Reqs
             it = it + 1
@@ -105,9 +114,6 @@ class Spotianalyze:
             
 
 
-
-spotianalyze = Spotianalyze('kyler4646', '4fd6158dd6e34661a9189a2cb2122445', 'ee472e4cf73743009fec5d6fb827a8c1', 'https://google.com/')
-print(spotianalyze.create_csv('kyles_lib.csv'))
 
     # Fns to get current playing info in dict format
     # Fns to loop
