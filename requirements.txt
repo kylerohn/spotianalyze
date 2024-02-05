@@ -1,0 +1,5 @@
+spotipy
+psutil
+numpy
+matplotlib
+pandas
