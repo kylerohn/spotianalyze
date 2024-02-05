@@ -1,0 +1,8 @@
+*.csv
+*.pem
+/.vscode
+/Scripts
+/lib
+/share
+.cache-kyler4646
+pyvenv.cfg
