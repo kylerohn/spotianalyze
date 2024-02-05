@@ -3,3 +3,4 @@ psutil
 numpy
 matplotlib
 pandas
+ipython

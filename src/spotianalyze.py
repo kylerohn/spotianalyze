@@ -1,8 +1,5 @@
 
-import vis
-import data_mgr as dmgr
 from const import CONST as C
-import playlist_mgr as pmgr
 import os
 import spotipy
 import spotipy.util as util
@@ -10,7 +7,6 @@ from json.decoder import JSONDecodeError
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
-import playlist_data as pldat
 import csv
 
 
