@@ -10,3 +10,4 @@ pyvenv.cfg
 /data/*
 /bin
 /lib64
+/src/__pycache__
