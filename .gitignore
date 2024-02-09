@@ -6,3 +6,7 @@
 /share
 .cache-kyler4646
 pyvenv.cfg
+.cache
+/data/*
+/bin
+/lib64
