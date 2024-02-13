@@ -4,24 +4,9 @@ import pandas as pd
 
 ####################################################################################################################
 # Get Features for Song by ID as Dict from DataFrame
-def get_feature_dict(spotianalyze_object, song_dataframe=pd.DataFrame()):
 
-    # Local Vars Declaration for Song Features
-    features = {
-        CONST.DANCEABILITY: [],
-        CONST.ENERGY: [],
-        CONST.KEY: [],
-        CONST.LOUDNESS: [],
-        CONST.SPEECHINESS: [],
-        CONST.ACOUSTICNESS: [],
-        CONST.INSTRUMENTALNESS: [],
-        CONST.LIVENESS: [],
-        CONST.VALENCE: [],
-        CONST.TEMPO: []
-    }
 
     # Create Spotify Object
-    spotify_object = spotianalyze_object.SPOTIFY_OBJECT
 
     # Get Shape of Dataframe input
     rows, cols = song_dataframe.shape

@@ -3,7 +3,13 @@ from const import CONST as C
 import pandas as pd
 from spotipy import Spotify
 from re import sub
+import numpy as np
+import matplotlib.pyplot as plt
 
+
+# =========================================================================================================
+# =========================================================================================================
+# =========================================================================================================
 
 def create_library(spotify_object: Spotify):
     """
@@ -47,7 +53,7 @@ def create_library(spotify_object: Spotify):
 
         # Extract and store relevant data in the dictionary
         for track_info in saved_tracks_info:
-            song_dict = response_transformer(track_info[C.TRACK], song_dict)
+            song_dict = _response_transformer(track_info[C.TRACK], song_dict)
             print(song_dict[C.NAME][-1])
 
         # Print the names of the tracks (for demonstration purposes)
@@ -68,10 +74,58 @@ def create_library(spotify_object: Spotify):
 
     # Return a dataframe containing information about the user's liked songs
     pd.DataFrame.from_dict(song_dict).to_csv(path_or_buf="data/library.csv")
-    pd.DataFrame.from_dict(artist_dict).to_csv(path_or_buf="data/artists.csv")
+
+    artist_data = pd.DataFrame.from_dict(artist_dict)
+    artist_data.drop_duplicates(subset=[C.ARTISTS], inplace=True)
+    artist_data.to_csv(path_or_buf="data/artists.csv", index=False)
+    add_feature_dict(spotify_object, "data/library.csv")
+
+# =========================================================================================================
+# =========================================================================================================
+# =========================================================================================================
+
+def create_from_playlist(spotify_object: Spotify):
 
 
+# =========================================================================================================
+# =========================================================================================================
+# =========================================================================================================
+    
+def add_feature_dict(spotify_object, song_csv: str):
 
+    # Local Vars Declaration for Song Features
+    features = {
+        C.DANCEABILITY: [],
+        C.ENERGY: [],
+        C.KEY: [],
+        C.LOUDNESS: [],
+        C.SPEECHINESS: [],
+        C.ACOUSTICNESS: [],
+        C.INSTRUMENTALNESS: [],
+        C.LIVENESS: [],
+        C.VALENCE: [],
+        C.TEMPO: []
+    }
+
+
+    song_data = pd.read_csv(filepath_or_buffer=song_csv)
+    uri_list = song_data[C.URI].to_list()
+    uri_segments = list(divide_list(uri_list, 100))
+
+    for uri_range in uri_segments:
+        feature_range = spotify_object.audio_features(tracks=uri_range)
+
+        
+        for feature in feature_range:
+            _response_transformer(feature, features)
+    
+    feature_data = pd.DataFrame.from_dict(features)
+    song_data = pd.merge(song_data, feature_data, left_index=True, right_index=True)
+    song_data.to_csv(song_csv, index=False)
+
+# =========================================================================================================
+# =========================================================================================================
+# =========================================================================================================
 
 def _artist_parser(spotify_object: Spotify, artists: dict):
     """
@@ -93,9 +147,10 @@ def _artist_parser(spotify_object: Spotify, artists: dict):
     new_artist_col = []
 
     artist_info_dict = {C.ARTISTS: [],
-                            C.GENRES: [],
-                            C.POPULARITY:[],
-                            C.URI: []}
+                        C.GENRES: [],
+                        C.POPULARITY:[],
+                        C.URI: []}
+    
     gp_info = {C.GENRES: [],
                C.POPULARITY: []}
 
@@ -119,19 +174,18 @@ def _artist_parser(spotify_object: Spotify, artists: dict):
     for uri_range in uri_segments:
         artist_range = spotify_object.artists(uri_range)
         for artist in artist_range[C.ARTISTS]:
-            response_transformer(artist, gp_info)
+            _response_transformer(artist, gp_info)
     
     artist_info_dict[C.GENRES] = gp_info[C.GENRES]
     artist_info_dict[C.POPULARITY] = gp_info[C.POPULARITY]
-        
 
     return new_artist_col, artist_info_dict
     
+# =========================================================================================================
+# =========================================================================================================
+# =========================================================================================================
 
-
-
-
-def response_transformer(response_dict: dict, transformed_reciever: dict):
+def _response_transformer(response_dict: dict, transformed_reciever: dict):
     for key in transformed_reciever:
         try:
             if key == C.NAME:
@@ -143,9 +197,44 @@ def response_transformer(response_dict: dict, transformed_reciever: dict):
             pass
     return transformed_reciever
 
+# =========================================================================================================
+# =========================================================================================================
+# =========================================================================================================
 
 def divide_list(l, n): 
       
     # looping till length l 
     for i in range(0, len(l), n):  
         yield l[i:i + n]
+
+# =========================================================================================================
+# =========================================================================================================
+# =========================================================================================================
+
+def features_histogram(library_filepath: str):
+    
+    A = get_features_matrix(library_filepath)
+
+    fig, axs = plt.subplots(2, 5)
+
+    axs = np.reshape(axs, newshape=(1, 10))
+
+    for i, ax in enumerate(axs[0]):
+        ax.hist(A[i])
+        ax.set_title(C.KEYLIST[i])
+
+    axs = np.reshape(axs, newshape=(2, 5))
+    plt.show()
+
+# =========================================================================================================
+# =========================================================================================================
+# =========================================================================================================
+
+def get_features_matrix(library_filepath):
+    song_data = pd.read_csv(filepath_or_buffer=library_filepath)
+    A = []
+    for key in C.KEYLIST:
+        data = song_data[key].to_numpy()
+        A.append(data)
+    A = np.array(A)
+    return A
