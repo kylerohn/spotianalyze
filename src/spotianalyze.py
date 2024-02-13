@@ -84,7 +84,61 @@ def create_library(spotify_object: Spotify):
 # =========================================================================================================
 # =========================================================================================================
 
+
 def create_from_playlist(spotify_object: Spotify):
+
+    song_dict = {
+        C.ARTISTS: [],
+        C.DURATION_MS: [],
+        C.EXPLICIT: [],
+        C.NAME: [],
+        C.POPULARITY: [],
+        C.URI: []
+    }
+
+    uris = []
+    names = []
+    for item in spotify_object.current_user_playlists()[C.ITEMS]:
+        if item[C.OWNER][C.DISPLAY_NAME] == C.USER:
+            uris.append(item[C.URI])
+            names.append(item[C.NAME])
+            print(f"{len(uris)}: {item[C.NAME]}")
+    selection = int(input("> ")) - 1
+    
+    limit = 100
+
+    next_page = True
+
+    playlist_tracks = spotify_object.playlist_items(uris[selection], limit=limit)
+
+    while next_page:
+        # Extract information about the tracks from the current set
+        playlist_tracks_info = playlist_tracks[C.ITEMS]
+
+        # Extract and store relevant data in the dictionary
+        for track_info in playlist_tracks_info:
+            song_dict = _response_transformer(track_info[C.TRACK], song_dict)
+            print(song_dict[C.NAME][-1])
+
+
+        # Check if there are more pages
+        if not playlist_tracks['next']:
+            next_page = False
+        else:
+            # Move to the next page of saved tracks
+            saved_tracks = spotify_object.next(saved_tracks)
+
+    artist_uris, artist_dict = _artist_parser(spotify_object, song_dict[C.ARTISTS])
+
+    del song_dict[C.ARTISTS]
+    song_dict[C.ARTISTS] = artist_uris
+
+    pd.DataFrame.from_dict(song_dict).to_csv(path_or_buf=f"data/{names[selection]}.csv")
+    add_feature_dict(spotify_object, f"data/{names[selection]}.csv")
+    
+        
+
+
 
 
 # =========================================================================================================

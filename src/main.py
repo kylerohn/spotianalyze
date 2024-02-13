@@ -4,6 +4,8 @@ from const import CONST as C
 import numpy as np
 from IPython.display import display
 import matplotlib.pyplot as plt
+import spotipy
+from spotipy import SpotifyOAuth
 
 # export SPOTIPY_CLIENT_ID='770e8d064cc34410a3954b64add60085'
 # export SPOTIPY_CLIENT_SECRET='8a335a6376074a7b8f4696c51b05e860'
@@ -19,11 +21,10 @@ scope = """
                 playlist-modify-private
                 """
 
-# sp = spotipy.Spotify(auth_manager=SpotifyOAuth(scope=scope))
+sp = spotipy.Spotify(auth_manager=SpotifyOAuth(scope=scope))
 
 
-df = pd.read_csv(filepath_or_buffer="data/artists.csv")
-display(df)
+create_from_playlist(sp)
 
 
 # for i0, i in enumerate(A):
