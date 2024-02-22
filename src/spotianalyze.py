@@ -5,7 +5,8 @@ from spotipy import Spotify
 from re import sub
 import numpy as np
 import matplotlib.pyplot as plt
-
+import ast
+#Spencer Recommends Seaborn data visualization its based on matplotlib but has some combined functions
 
 # =========================================================================================================
 # =========================================================================================================
@@ -75,9 +76,9 @@ def create_library(spotify_object: Spotify):
     # Return a dataframe containing information about the user's liked songs
     pd.DataFrame.from_dict(song_dict).to_csv(path_or_buf="data/library.csv")
 
-    artist_data = pd.DataFrame.from_dict(artist_dict)
-    artist_data.drop_duplicates(subset=[C.ARTISTS], inplace=True)
-    artist_data.to_csv(path_or_buf="data/artists.csv", index=False)
+    # artist_data = pd.DataFrame.from_dict(artist_dict)
+    # artist_data.drop_duplicates(subset=[C.ARTISTS], inplace=True)
+    # artist_data.to_csv(path_or_buf="data/artists.csv", index=False)
     add_feature_dict(spotify_object, "data/library.csv")
 
 # =========================================================================================================
@@ -106,20 +107,7 @@ def create_from_playlist(spotify_object: Spotify):
     }
 
     # Initialize empty lists to store URIs and names of playlists
-    uris = []
-    names = []
-
-    # Iterate through user playlists to find the selected playlist
-    for item in spotify_object.current_user_playlists()[C.ITEMS]:
-        # Check if the playlist belongs to the user
-        if item[C.OWNER][C.DISPLAY_NAME] == C.USER:
-            uris.append(item[C.URI])
-            names.append(item[C.NAME])
-            # Print playlist names for user selection
-            print(f"{len(uris)}: {item[C.NAME]}")
-
-    # Prompt user to select a playlist
-    selection = int(input("> ")) - 1
+    selection = get_playlist(spotify_object)
 
     # Set limit for number of tracks to fetch per API request
     limit = 100
@@ -128,7 +116,7 @@ def create_from_playlist(spotify_object: Spotify):
     next_page = True
 
     # Fetch playlist tracks
-    playlist_tracks = spotify_object.playlist_items(uris[selection], limit=limit)
+    playlist_tracks, names = spotify_object.playlist_items(selection, limit=limit)
 
     while next_page:
         # Extract information about the tracks from the current set
@@ -207,7 +195,7 @@ def add_feature_dict(spotify_object, song_csv: str):
     feature_data = pd.DataFrame.from_dict(features)
 
     # Merge feature data with song data based on index
-    song_data = pd.merge(song_data, feature_data, left_index=True, right_index=True)
+    song_data = pd.merge(song_data, feature_data)
 
     # Save the updated song data to the CSV file
     song_data.to_csv(song_csv, index=False)
@@ -387,3 +375,59 @@ def get_features_matrix(library_filepath):
     A = np.array(A)
     
     return A
+
+# =========================================================================================================
+# =========================================================================================================
+# =========================================================================================================
+
+def get_playlist(spotify_object: Spotify):
+    uris = []
+    names = []
+
+    # Iterate through user playlists to find the selected playlist
+    for item in spotify_object.current_user_playlists()[C.ITEMS]:
+        # Check if the playlist belongs to the user
+        if item[C.OWNER][C.DISPLAY_NAME] == C.USER:
+            uris.append(item[C.URI])
+            names.append(item[C.NAME])
+            # Print playlist names for user selection
+            print(f"{len(uris)}: {item[C.NAME]}")
+
+    # Prompt user to select a playlist
+    selection = int(input("> ")) - 1
+
+    return uris[selection], names
+
+# =========================================================================================================
+# =========================================================================================================
+# =========================================================================================================
+
+def playlist_from_genres(spotify_object: Spotify, _genres: list):
+    #! DONT USE!!!!
+    uri = get_playlist(spotify_object)
+    artist_list = []
+
+    df = pd.read_csv("data/artists.csv")
+    for idx, genres in enumerate(df[C.GENRES]):
+        genres = ast.literal_eval(genres)
+        for genre in genres:
+            if genre in _genres:
+                print(df[C.ARTISTS][idx])
+                artist_list.append(df[C.URI][idx])
+                break
+    # print(artist_list)
+    df2 = pd.read_csv(filepath_or_buffer="data/library.csv")
+
+    song_list = []
+    input()
+
+    for idx, artists in enumerate(df2[C.ARTISTS]):
+        for artist in ast.literal_eval(artists):
+            if artist in artist_list:
+                print(df2[C.NAME][idx])
+                song_list.append(df2[C.URI][idx])
+                break
+
+    song_list = divide_list(song_list, 100)
+    for l in song_list:
+        sp.playlist_add_items(uri, l)
