@@ -17,6 +17,9 @@ import ast
 #Factors that impact musical difference are: Key, (Speechiness has high diff btwn songs)
 #Liveness, Valence
 
+LIBRARY_FILEPATH = "data/library.csv"
+ARTIST_FILEPATH = "data/artists.csv"
+
 scope = """
         user-read-private 
         user-read-playback-state 
@@ -27,10 +30,16 @@ scope = """
         playlist-modify-private
         """
 
-sp = spotipy.Spotify(auth_manager=SpotifyOAuth(scope=scope))
+# sp = spotipy.Spotify(auth_manager=SpotifyOAuth(scope=scope))
 
+songs = dataframe_to_objects(LIBRARY_FILEPATH, ARTIST_FILEPATH)
 
-create_library(sp)
+for song in songs:
+    print(f"Song: {song.name}, Artists: ", end=" ")
+    for artist in song.artists:
+        print(f"{artist.name};", end=" ")
+        
+    print()
 
 
 exit()

@@ -6,6 +6,8 @@ from re import sub
 import numpy as np
 import matplotlib.pyplot as plt
 import ast
+from Artist import Artist
+from Song import Song
 #Spencer Recommends Seaborn data visualization its based on matplotlib but has some combined functions
 
 # =========================================================================================================
@@ -76,9 +78,9 @@ def create_library(spotify_object: Spotify):
     # Return a dataframe containing information about the user's liked songs
     pd.DataFrame.from_dict(song_dict).to_csv(path_or_buf="data/library.csv")
 
-    # artist_data = pd.DataFrame.from_dict(artist_dict)
-    # artist_data.drop_duplicates(subset=[C.ARTISTS], inplace=True)
-    # artist_data.to_csv(path_or_buf="data/artists.csv", index=False)
+    artist_data = pd.DataFrame.from_dict(artist_dict)
+    artist_data.drop_duplicates(subset=[C.ARTISTS], inplace=True)
+    artist_data.to_csv(path_or_buf="data/artists.csv", index=False)
     add_feature_dict(spotify_object, "data/library.csv")
 
 # =========================================================================================================
@@ -430,4 +432,34 @@ def playlist_from_genres(spotify_object: Spotify, _genres: list):
 
     song_list = divide_list(song_list, 100)
     for l in song_list:
-        sp.playlist_add_items(uri, l)
+        spotify_object.playlist_add_items(uri, l)
+
+# =========================================================================================================
+# =========================================================================================================
+# =========================================================================================================
+        
+def dataframe_to_objects(library_filepath: str, artist_filepath: str):
+    song_data = pd.read_csv(filepath_or_buffer=library_filepath)
+    artist_data = pd.read_csv(filepath_or_buffer=artist_filepath)
+
+    artist_collection = []
+    for idx, artist in enumerate(artist_data[C.ARTISTS]):
+        artist_obj = Artist(artist, ast.literal_eval(artist_data[C.GENRES][idx]), artist_data[C.POPULARITY][idx], 
+                            artist_data[C.URI][idx])
+        artist_collection.append(artist_obj)
+    
+    song_collection = []
+    for idx, song in enumerate(song_data[C.NAME]):
+        song_obj = Song(song, song_data[C.DURATION_MS][idx], song_data[C.EXPLICIT][idx], song_data[C.URI][idx],
+                        song_data[C.DANCEABILITY][idx], song_data[C.ENERGY][idx], song_data[C.KEY][idx], 
+                        song_data[C.SPEECHINESS][idx], song_data[C.ACOUSTICNESS][idx], song_data[C.INSTRUMENTALNESS][idx],
+                        song_data[C.VALENCE][idx], song_data[C.TEMPO][idx], [])
+        artist_uris = ast.literal_eval(song_data[C.ARTISTS][idx])
+        song_artists = []
+        for artist_obj in artist_collection:
+            for artist_uri in artist_uris:
+                if artist_uri == artist_obj.uri:
+                    song_artists.append(artist_obj)
+        song_obj.artists = song_artists
+        song_collection.append(song_obj)
+    return song_collection
