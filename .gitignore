@@ -9,6 +9,6 @@ pyvenv.cfg
 .cache
 /data/*
 bin/
-lib64/
+lib64
 src/__pycache__
 *.sh
