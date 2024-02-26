@@ -12,3 +12,4 @@ bin/
 lib64
 src/__pycache__
 *.sh
+src/main.py
