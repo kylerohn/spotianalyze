@@ -32,16 +32,8 @@ scope = """
 
 # sp = spotipy.Spotify(auth_manager=SpotifyOAuth(scope=scope))
 
-songs = dataframe_to_objects(LIBRARY_FILEPATH, ARTIST_FILEPATH)
-
-for song in songs:
-    print(f"Song: {song.name}, Artists: ", end=" ")
-    for artist in song.artists:
-        print(f"{artist.name};", end=" ")
-        
-    print()
 
 
-exit()
 
-        
+
+
