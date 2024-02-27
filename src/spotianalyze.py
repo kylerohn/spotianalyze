@@ -87,7 +87,6 @@ def create_library(spotify_object: Spotify):
 # =========================================================================================================
 # =========================================================================================================
 
-
 def create_from_playlist(spotify_object: Spotify):
     """
     Creates a CSV file containing songs from a selected playlist on Spotify.
@@ -288,7 +287,6 @@ def _response_transformer(response_dict: dict, transformed_receiver: dict):
 
     return transformed_receiver
 
-
 # =========================================================================================================
 # =========================================================================================================
 # =========================================================================================================
@@ -344,7 +342,6 @@ def features_histogram(library_filepath: str):
     # Display the plot
     plt.show()
 
-
 # =========================================================================================================
 # =========================================================================================================
 # =========================================================================================================
@@ -382,7 +379,24 @@ def get_features_matrix(library_filepath):
 # =========================================================================================================
 # =========================================================================================================
 
-def get_playlist(spotify_object: Spotify):
+def get_playlist(spotify_object: Spotify) -> Tuple[str, str]:
+    """
+    Retrieve a playlist URI and its name from the user's Spotify account.
+
+    Args:
+        spotify_object (Spotify): The Spotify object authenticated with the user's credentials.
+
+    Returns:
+        tuple: A tuple containing the URI and name of the selected playlist.
+
+    Raises:
+        IndexError: If the user enters an invalid selection.
+        ValueError: If the user input is not a valid integer.
+
+    Note:
+        This function assumes that `spotify_object` is authenticated and has access to the user's playlists.
+    """
+    # Lists to store URIs and names of playlists
     uris = []
     names = []
 
@@ -398,57 +412,107 @@ def get_playlist(spotify_object: Spotify):
     # Prompt user to select a playlist
     selection = int(input("> ")) - 1
 
-    return uris[selection], names
+    # Return the URI and name of the selected playlist
+    return uris[selection], names[selection]
+
 
 # =========================================================================================================
 # =========================================================================================================
 # =========================================================================================================
 
 def playlist_from_genres(spotify_object: Spotify, _genres: list):
-    #! DONT USE!!!!
+    """
+    Create a playlist on Spotify based on a given list of genres.
+
+    WARNING: This function is marked as deprecated ('DONT USE') and should not be used.
+
+    Args:
+        spotify_object (Spotify): The Spotify object authenticated with the user's credentials.
+        _genres (list): A list of genres to filter artists and songs.
+
+    Note:
+        This function relies on external CSV files ('artists.csv' and 'library.csv') and may not work if they are missing or formatted incorrectly.
+    """
+    # WARNING: Deprecated function. Do not use!
+
+    # Get the URI of the selected playlist
     uri = get_playlist(spotify_object)
+    
+    # List to store artist URIs
     artist_list = []
 
+    # Read artists data from 'artists.csv'
     df = pd.read_csv("data/artists.csv")
+    
+    # Iterate through artists and their genres
     for idx, genres in enumerate(df[C.GENRES]):
         genres = ast.literal_eval(genres)
+        # Check if any genre matches the given genres
         for genre in genres:
             if genre in _genres:
                 print(df[C.ARTISTS][idx])
                 artist_list.append(df[C.URI][idx])
                 break
-    # print(artist_list)
+    
+    # Read library data from 'library.csv'
     df2 = pd.read_csv(filepath_or_buffer="data/library.csv")
 
+    # List to store song URIs
     song_list = []
+    
+    # Wait for user input
     input()
 
+    # Iterate through songs and their artists
     for idx, artists in enumerate(df2[C.ARTISTS]):
         for artist in ast.literal_eval(artists):
             if artist in artist_list:
                 print(df2[C.NAME][idx])
                 song_list.append(df2[C.URI][idx])
                 break
-
+    
+    # Split song_list into chunks of 100 (due to Spotify API limitations)
     song_list = divide_list(song_list, 100)
+    
+    # Add songs to the playlist on Spotify
     for l in song_list:
         spotify_object.playlist_add_items(uri, l)
+
 
 # =========================================================================================================
 # =========================================================================================================
 # =========================================================================================================
         
 def dataframe_to_objects(library_filepath: str, artist_filepath: str):
+    """
+    Convert data from CSV files to objects.
+
+    Args:
+        library_filepath (str): Filepath to the CSV file containing song data.
+        artist_filepath (str): Filepath to the CSV file containing artist data.
+
+    Returns:
+        list: A list containing Song and Artist objects.
+
+    Note:
+        The CSV files must have specific columns representing song and artist attributes.
+    """
+    # Read song data from CSV file
     song_data = pd.read_csv(filepath_or_buffer=library_filepath)
+    # Read artist data from CSV file
     artist_data = pd.read_csv(filepath_or_buffer=artist_filepath)
 
+    # List to store Artist objects
     artist_collection = []
+    # Create Artist objects from data
     for idx, artist in enumerate(artist_data[C.ARTISTS]):
         artist_obj = Artist(artist, ast.literal_eval(artist_data[C.GENRES][idx]), artist_data[C.POPULARITY][idx], 
                             artist_data[C.URI][idx])
         artist_collection.append(artist_obj)
     
+    # List to store Song objects
     song_collection = []
+    # Create Song objects from data
     for idx, song in enumerate(song_data[C.NAME]):
         song_obj = Song(song, song_data[C.DURATION_MS][idx], song_data[C.EXPLICIT][idx], song_data[C.URI][idx],
                         song_data[C.DANCEABILITY][idx], song_data[C.ENERGY][idx], song_data[C.KEY][idx], 
@@ -456,15 +520,17 @@ def dataframe_to_objects(library_filepath: str, artist_filepath: str):
                         song_data[C.VALENCE][idx], song_data[C.TEMPO][idx], [])
         artist_uris = ast.literal_eval(song_data[C.ARTISTS][idx])
         song_artists = []
+        # Match artists to Song objects
         for artist_obj in artist_collection:
             for artist_uri in artist_uris:
                 if artist_uri == artist_obj.uri:
                     song_artists.append(artist_obj)
         song_obj.artists = song_artists
         song_collection.append(song_obj)
+    
+    # Return the list of Song and Artist objects
     return song_collection
 
 # =========================================================================================================
 # =========================================================================================================
 # =========================================================================================================
-
