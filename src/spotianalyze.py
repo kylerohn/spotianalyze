@@ -379,7 +379,7 @@ def get_features_matrix(library_filepath):
 # =========================================================================================================
 # =========================================================================================================
 
-def get_playlist(spotify_object: Spotify) -> Tuple[str, str]:
+def get_playlist(spotify_object: Spotify):
     """
     Retrieve a playlist URI and its name from the user's Spotify account.
 
