@@ -80,3 +80,14 @@ class CONST:
         VALENCE,
         TEMPO
     ]
+
+    ALTERED_KEYLIST = [
+        DANCEABILITY,
+        ENERGY,
+        KEY,
+        SPEECHINESS,
+        ACOUSTICNESS,
+        INSTRUMENTALNESS,
+        VALENCE,
+        TEMPO
+    ]
