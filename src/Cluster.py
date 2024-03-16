@@ -20,6 +20,10 @@ class Cluster:
         for arg in args:
             self.cluster.append(arg)
 
+
+    def __repr__(self):
+        return f"Rows: {len(self.cluster)}"
+
     
     def merge(self, merge_cluster):
         """
