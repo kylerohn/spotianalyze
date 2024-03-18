@@ -87,7 +87,6 @@ class CONST:
         KEY,
         SPEECHINESS,
         ACOUSTICNESS,
-        INSTRUMENTALNESS,
         VALENCE,
         TEMPO
     ]

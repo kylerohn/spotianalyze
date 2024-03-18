@@ -7,7 +7,7 @@ class Cluster:
     """
 
 
-    def __init__(self, *args):
+    def __init__(self, names, *args):
         """
         Initializes Cluster object with list or collection of lists
 
@@ -17,6 +17,7 @@ class Cluster:
         Returns
         """
         self.cluster = []
+        self.names = [names]
         for arg in args:
             print(arg)
             # normalize values between 0 and 1
@@ -49,6 +50,8 @@ class Cluster:
         """
         for c in merge_cluster.cluster:
             self.cluster.append(c)
+        for n in merge_cluster.names:
+            self.names.append(n)
     
 
     def avg_features(self):
