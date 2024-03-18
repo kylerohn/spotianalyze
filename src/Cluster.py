@@ -20,9 +20,6 @@ class Cluster:
         self.names = [names]
         for arg in args:
             print(arg)
-            # normalize values between 0 and 1
-            arg[2] = arg[2] / 11
-            arg[-1] = (arg[-1] - 60) / 180
             self.cluster.append(arg)
 
 

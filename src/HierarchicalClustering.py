@@ -15,7 +15,7 @@ class HierarchicalCluster:
             min_val = np.min(row_t)
             max_val = np.max(row_t)
             for c, val_t in enumerate(row_t):
-                feature_matrix[r][c] = (val_t - min_val) / (max_val - min_val)
+                feature_matrix[r][c] = ((val_t - min_val) / (max_val - min_val))
         feature_matrix = feature_matrix.T
         self.clusters: list[Cluster] = []
         for idx, row in enumerate(feature_matrix):
