@@ -61,7 +61,7 @@ class HierarchicalCluster:
 
     def heatmap(self):
         heatmap_arr = self.clusters[0].to_numpy()
-        plt.imshow(heatmap_arr, interpolation='nearest', aspect=0.01, cmap='hot')
+        plt.imshow(heatmap_arr, interpolation='nearest', aspect=0.05, cmap='hot')
         plt.show()
 
 
