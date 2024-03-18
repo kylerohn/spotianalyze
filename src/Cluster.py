@@ -18,6 +18,10 @@ class Cluster:
         """
         self.cluster = []
         for arg in args:
+            print(arg)
+            # normalize values between 0 and 1
+            arg[2] = arg[2] / 11
+            arg[7] = (arg[7] - 60) / 180
             self.cluster.append(arg)
 
 
@@ -43,7 +47,8 @@ class Cluster:
             This method assumes that the merge_cluster parameter is an object 
             of a class with a 'cluster' attribute representing a cluster of data.
         """
-        self.cluster.append(merge_cluster.cluster)
+        for c in merge_cluster.cluster:
+            self.cluster.append(c)
     
 
     def avg_features(self):
@@ -67,6 +72,8 @@ class Cluster:
             [4.0, 5.0, 6.0]
         """
         # turn current cluster into numpy array
+
+
         np_cluster = np.array(self.cluster)
 
         # sum columns
@@ -76,3 +83,8 @@ class Cluster:
         sums /= len(self.cluster)
 
         return sums   
+    
+
+    def to_numpy(self):
+
+        return np.array(self.cluster)
