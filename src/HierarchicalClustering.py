@@ -9,6 +9,14 @@ class HierarchicalCluster:
 
         song_names = cluster_data[C.NAME]
         feature_matrix: np.array = cluster_data[features].to_numpy()
+        #normalize values
+        feature_matrix = feature_matrix.T
+        for r, row_t in enumerate(feature_matrix):
+            min_val = np.min(row_t)
+            max_val = np.max(row_t)
+            for c, val_t in enumerate(row_t):
+                feature_matrix[r][c] = (val_t - min_val) / (max_val - min_val)
+        feature_matrix = feature_matrix.T
         self.clusters: list[Cluster] = []
         for idx, row in enumerate(feature_matrix):
             self.clusters.append(Cluster(song_names[idx], row))
