@@ -90,7 +90,7 @@ class AgglomerativeCluster:
 
     def heatmap(self):
         heatmap_arr = self.clusters[0].to_numpy()
-        names_arr = self.clusters[0]
+        names_arr = self.clusters[0].names
         print(self.clusters[0].names)
         print()
         for cluster in (self.clusters[1:]):
