@@ -72,19 +72,39 @@ class Cluster:
             [4.0, 5.0, 6.0]
         """
         # turn current cluster into numpy array
-
-
         np_cluster = np.array(self.cluster)
-
         # sum columns
         sums = np.sum(np_cluster, axis=0)
-
         # divide each element by the length of the cluster
         sums /= len(self.cluster)
+        return sums  
 
-        return sums   
-    
+
+    def min_features(self):
+        mins = []
+        np_cluster = np.array(self.cluster).T
+        for row in np_cluster:
+            mins.append(float(min(row)))
+        return (np.array(mins))
+
+
+    def max_features(self):
+        maxs = []
+        np_cluster = np.array(self.cluster).T
+        for row in np_cluster:
+            maxs.append(float(max(row)))
+        return (np.array(maxs))
+
+    def linkage(self, link_select: str='average'):
+        if link_select == 'average':
+            res = self.avg_features()
+        elif link_select == 'min':
+            res = self.min_features()
+        elif link_select == 'max':
+            res = self.max_features()
+        else:
+            print("Invalid Linkage Selection. Options: average, min, max")
+        return res
 
     def to_numpy(self):
-
         return np.array(self.cluster)

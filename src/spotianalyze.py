@@ -196,7 +196,7 @@ def add_feature_dict(spotify_object, song_csv: str):
     feature_data = pd.DataFrame.from_dict(features)
 
     # Merge feature data with song data based on index
-    song_data = pd.merge(song_data, feature_data)
+    song_data = pd.merge(song_data, feature_data, left_index=True, right_index=True)
 
     # Save the updated song data to the CSV file
     song_data.to_csv(song_csv, index=False)

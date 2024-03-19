@@ -13,3 +13,4 @@ lib64
 src/__pycache__
 *.sh
 src/main.py
+etc/jupyter/nbconfig/notebook.d/jupyterlab-plotly.json
