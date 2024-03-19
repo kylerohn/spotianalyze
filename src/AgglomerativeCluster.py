@@ -6,19 +6,23 @@ from const import CONST as C
 import plotly.express as px
 
 class AgglomerativeCluster:
-    def __init__(self, cluster_data: DataFrame, features: list):
+    def __init__(self, cluster_data: DataFrame, features: list, identifier_key: str):
         """
         Initializes a HierarchicalClustering object.
 
         Args:
             cluster_data (DataFrame): DataFrame containing the data for clustering.
             features (list): List of feature names to be used for clustering.
+            identifier_key (str): name of column to be used as the identifier for each sample
 
         Returns:
             None
         """
         # Extract song names from the DataFrame
-        song_names = cluster_data[C.NAME]  # Assuming C.NAME is the column name for song names
+        song_names = cluster_data[identifier_key]
+
+        #set features as class variable
+        self.features = features
 
         # Extract feature matrix from the DataFrame and convert it to a NumPy array
         feature_matrix: np.array = cluster_data[features].to_numpy()
@@ -86,14 +90,19 @@ class AgglomerativeCluster:
 
     def heatmap(self):
         heatmap_arr = self.clusters[0].to_numpy()
+        names_arr = self.clusters[0]
         print(self.clusters[0].names)
         print()
-        for cluster in self.clusters[1:]:
+        for cluster in (self.clusters[1:]):
             heatmap_arr = np.concatenate((heatmap_arr, cluster.to_numpy()))
+            for name in cluster.names:
+                names_arr.append(name)
             print(cluster.names)
             print()
-            
-        fig = px.imshow(heatmap_arr, aspect='auto')
+        
+        df = DataFrame(data=heatmap_arr, index=names_arr, columns=self.features)
+
+        fig = px.imshow(df, aspect='auto')
         fig.show()
 
 
