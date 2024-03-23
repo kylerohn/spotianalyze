@@ -84,7 +84,6 @@ class CONST:
     ALTERED_KEYLIST = [
         DANCEABILITY,
         ENERGY,
-        KEY,
         SPEECHINESS,
         ACOUSTICNESS,
         VALENCE,
