@@ -47,27 +47,37 @@ for idx, tempo in enumerate(df[C.TEMPO]):
 h = AgglomerativeCluster(df, C.ALTERED_KEYLIST, C.URI)
 clusters = h.hierarchical_cluster(n=50, linkage="min", distance="manhattan")
 
-h.heatmap()
-
-
 
 ldf = pd.read_csv(LIBRARY_FILEPATH)
 adf = pd.read_csv(ARTIST_FILEPATH)
 
-for cluster in clusters:
+
+def artist_search(song_ids, lib_df):
+    artist_list = []
+    for song in song_ids:
+        for lidx, lib_df_uri in enumerate(lib_df[C.URI]):
+            if song == lib_df_uri:
+                for artist in ast.literal_eval(lib_df[C.ARTISTS][lidx]):
+                    artist_list.append(artist)
+    return artist_list
+
+
+def genre_search(artist_ids, artist_df):
     genre_dict = {}
-    for c_uri in cluster.names:
-        for lidx, ldf_uri in enumerate(ldf[C.URI]):
-            if c_uri == ldf_uri:
-                artists = ast.literal_eval(ldf[C.ARTISTS][lidx])
-                for artist in artists:
-                    for aidx, adf_uri in enumerate(adf[C.URI]):
-                        if adf_uri == artist:
-                            genres = ast.literal_eval(adf[C.GENRES][aidx])
-                            for genre in genres:
-                                if genre not in genre_dict.keys():
-                                    genre_dict.update({genre : 1})
-                                else:
-                                    genre_dict[genre] += 1
-                break
-    print(genre_dict)
+    for artist in artist_ids:
+        for idx, artist_ in enumerate(artist_df[C.URI]):
+            if artist == artist_:
+                for genre in ast.literal_eval(artist_df[C.GENRES][idx]):
+                    if genre not in genre_dict.keys():
+                        genre_dict.update({genre : 1})
+                    else:
+                        genre_dict[genre] += 1
+    return genre_dict
+
+
+for cluster in clusters:
+    a = artist_search(cluster.names, ldf)
+    print(genre_search(a, adf))
+    print()
+
+
