@@ -45,7 +45,11 @@ for idx, tempo in enumerate(df[C.TEMPO]):
     df[C.TEMPO][idx] = tempo ** (1/3)
 
 h = AgglomerativeCluster(df, C.ALTERED_KEYLIST, C.URI)
-clusters = h.hierarchical_cluster(n=50, linkage="max", distance="manhattan")
+clusters = h.hierarchical_cluster(n=50, linkage="min", distance="manhattan")
+
+h.heatmap()
+
+
 
 ldf = pd.read_csv(LIBRARY_FILEPATH)
 adf = pd.read_csv(ARTIST_FILEPATH)
