@@ -22,8 +22,6 @@ class AgglomerativeCluster:
         # Extract song names from the DataFrame
         song_names = cluster_data[identifier_key]
 
-        
-
         # Extract feature matrix from the DataFrame and convert it to a NumPy array
         feature_matrix: np.array = cluster_data[features].to_numpy()
 
@@ -39,11 +37,7 @@ class AgglomerativeCluster:
             for c, val_t in enumerate(row_t):
                 feature_matrix[r][c] = ((val_t - min_val) / (max_val - min_val))
 
-        
-        
         feature_matrix = feature_matrix.T  # Transpose the feature matrix back to its original orientation
-
-        
 
         # Initialize an empty list to store Cluster objects
         self.clusters: list[Cluster] = []
@@ -73,7 +67,6 @@ class AgglomerativeCluster:
         if weights == None:
             weights = np.ones((1, self.columns))[0]
     
-
         # distance function assignment
         if distance == 'euclidian':
             dist_func = self._euclidian_distance
@@ -121,9 +114,3 @@ class AgglomerativeCluster:
 
         fig = px.imshow(df, aspect='auto')
         fig.show()
-
-
-
-
-            
-    
