@@ -1,5 +1,9 @@
-# Spotianalyze
-### Experiment #1: Logsistic Regression on Spotify Track Feature Data
-Null Hypothesis 1.1: Using song features provided by the spotify API for songs I've previously liked, a logistic regression algorithm will accurately predict whether I like an unknown song
+# Analysis of Spotify API Data with Hierarchical Clustering
+This repository is an attempt to perform machine learning methods on data from the spotify API. There are two fundemental pieces to this repository:   
+- A set of functions designed to analyze, clean, and store data pulled from the Spotify API utilizing the spotipy python module.
+- A Hierarchical Clustering module I built to gain more experience with machine learning algorithms and to analyze the data I had retrieved from spotify. Theoretically, this algorithm should work for any dataset provided to it in the proper format.
 
-Null Hypothesis 1.2: Using song features provided by the spotify API for songs in a playlist, a logistic regression algorithm will accurately predict whether a song belongs in the playlist or not
+Really, all of this was to practice retrieval/organization of data, and gain an understanding of machine learning fundementals, which in that regard, I've succeeded, however, hierarchical clustering for this dataset didn't work particurally well as a method of analysis. I will likely attempt others in the future, but for now this project is on hold. Regardless, here's an overview of how it all works.
+
+## Spotianalyze
+The file `spotianalyze.py` contains functions that access, clean and store data pulled from the spotify API, specifically, the user's "Liked Songs" playlist. The function `create_library(spotify_object)` creates two csv files: One to hold the songs in the playlist, and one to hold the artists that appear in that playlist. An important note about the spotify API is that artists have associated genres, but songs don't and instead have "features" describing certain aspects of the song. That topic will be explained more in depth later. The `spotify_object` parameter describes an object created with the spotipy library, which is an interface to make API calls to spotify easier. There is also the `create_from_playlist(spotify_object)` function, designed to do the same (for songs only) for any other playlist that might be saved to your library. 
