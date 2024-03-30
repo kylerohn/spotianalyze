@@ -4,7 +4,6 @@ from Cluster import Cluster
 import matplotlib.pyplot as plt
 from const import CONST as C
 import plotly.express as px
-from scipy.stats import skewtest
 
 class AgglomerativeCluster:
     def __init__(self, cluster_data: DataFrame, features: list, identifier_key: str):
