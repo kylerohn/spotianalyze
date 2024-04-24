@@ -26,7 +26,7 @@ def create_library(spotify_object: Spotify):
 
     Note:
         This function uses the Spotify Web API to retrieve information about the user's
-        liked songs, ...
+        liked songs, the artists that are contained in those songs, and the song feature data
 
     """
 
@@ -144,13 +144,13 @@ def create_from_playlist(spotify_object: Spotify):
     pd.DataFrame.from_dict(song_dict).to_csv(path_or_buf=f"data/{names[selection]}.csv")
 
     # Add features to the CSV file
-    add_feature_dict(spotify_object, f"data/{names[selection]}.csv")
+    _add_feature_dict(spotify_object, f"data/{names[selection]}.csv")
 
 # =========================================================================================================
 # =========================================================================================================
 # =========================================================================================================
     
-def add_feature_dict(spotify_object, song_csv: str):
+def _add_feature_dict(spotify_object, song_csv: str):
     """
     Fetches audio features for songs in a CSV file and adds them to the file.
 
@@ -424,7 +424,7 @@ def playlist_from_genres(spotify_object: Spotify, _genres: list):
     """
     Create a playlist on Spotify based on a given list of genres.
 
-    WARNING: This function is marked as deprecated ('DONT USE') and should not be used.
+    THIS FUNCTION IS UNFINISHED. DO NOT USE
 
     Args:
         spotify_object (Spotify): The Spotify object authenticated with the user's credentials.
@@ -433,7 +433,6 @@ def playlist_from_genres(spotify_object: Spotify, _genres: list):
     Note:
         This function relies on external CSV files ('artists.csv' and 'library.csv') and may not work if they are missing or formatted incorrectly.
     """
-    # WARNING: Deprecated function. Do not use!
 
     # Get the URI of the selected playlist
     uri = get_playlist(spotify_object)
@@ -459,9 +458,6 @@ def playlist_from_genres(spotify_object: Spotify, _genres: list):
 
     # List to store song URIs
     song_list = []
-    
-    # Wait for user input
-    input()
 
     # Iterate through songs and their artists
     for idx, artists in enumerate(df2[C.ARTISTS]):
