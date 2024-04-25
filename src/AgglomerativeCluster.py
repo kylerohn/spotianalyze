@@ -60,7 +60,7 @@ class AgglomerativeCluster:
         return sum
 
 
-    def hierarchical_cluster(self, n: int=1, linkage: str='average', distance: str='euclidian', weights: any = None):
+    def hierarchical_cluster(self, n: int=1, linkage: str='average', distance: str='euclidian', weights: any = None) -> list[Cluster]:
 
         #determine weights
         if weights == None:
