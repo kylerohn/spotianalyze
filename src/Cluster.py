@@ -1,6 +1,5 @@
 import numpy as np
 
-
 class Cluster:
     """
     Class to hold clusters of data for statistical analysis
