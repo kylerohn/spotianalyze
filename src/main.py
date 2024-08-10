@@ -11,11 +11,6 @@ from AgglomerativeCluster import AgglomerativeCluster
 from Cluster import Cluster
 
 
-
-# export SPOTIPY_CLIENT_ID='770e8d064cc34410a3954b64add60085'
-# export SPOTIPY_CLIENT_SECRET='8a335a6376074a7b8f4696c51b05e860'
-# export SPOTIPY_REDIRECT_URI='https://localhost/'
-
 # DANCEABILITY,
 # ENERGY,
 # KEY,
