@@ -11,5 +11,5 @@ pyvenv.cfg
 bin/
 lib64
 src/__pycache__
-*.sh
+.env
 etc/jupyter/nbconfig/notebook.d/jupyterlab-plotly.json

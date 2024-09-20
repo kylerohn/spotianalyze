@@ -76,12 +76,12 @@ def create_library(spotify_object: Spotify):
 
 
     # Return a dataframe containing information about the user's liked songs
-    pd.DataFrame.from_dict(song_dict).to_csv(path_or_buf="data/library.csv")
+    pd.DataFrame.from_dict(song_dict).to_csv(path_or_buf="./../data/library.csv")
 
     artist_data = pd.DataFrame.from_dict(artist_dict)
     artist_data.drop_duplicates(subset=[C.ARTISTS], inplace=True)
-    artist_data.to_csv(path_or_buf="data/artists.csv", index=False)
-    add_feature_dict(spotify_object, "data/library.csv")
+    artist_data.to_csv(path_or_buf="../data/artists.csv", index=False)
+    _add_feature_dict(spotify_object, "../data/library.csv")
 
 # =========================================================================================================
 # =========================================================================================================
