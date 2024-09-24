@@ -36,8 +36,6 @@ scope = """
 
 # sp = spotipy.Spotify(auth_manager=SpotifyOAuth(scope=scope))
 df = pd.read_csv(LIBRARY_FILEPATH)
-for idx, tempo in enumerate(df[C.TEMPO]):
-    df[C.TEMPO][idx] = tempo ** (1/3)
 
 h = AgglomerativeCluster(df, C.ALTERED_KEYLIST, C.NAME)
 clusters = h.hierarchical_cluster(n=50, linkage="min", distance="manhattan")

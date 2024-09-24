@@ -6,8 +6,6 @@ from re import sub
 import numpy as np
 import matplotlib.pyplot as plt
 import ast
-from Artist import Artist
-from Song import Song
 #Spencer Recommends Seaborn data visualization its based on matplotlib but has some combined functions
 
 # =========================================================================================================
@@ -474,58 +472,6 @@ def playlist_from_genres(spotify_object: Spotify, _genres: list):
     for l in song_list:
         spotify_object.playlist_add_items(uri, l)
 
-
-# =========================================================================================================
-# =========================================================================================================
-# =========================================================================================================
-        
-def dataframe_to_objects(library_filepath: str, artist_filepath: str):
-    """
-    Convert data from CSV files to objects.
-
-    Args:
-        library_filepath (str): Filepath to the CSV file containing song data.
-        artist_filepath (str): Filepath to the CSV file containing artist data.
-
-    Returns:
-        list: A list containing Song and Artist objects.
-
-    Note:
-        The CSV files must have specific columns representing song and artist attributes.
-    """
-    # Read song data from CSV file
-    song_data = pd.read_csv(filepath_or_buffer=library_filepath)
-    # Read artist data from CSV file
-    artist_data = pd.read_csv(filepath_or_buffer=artist_filepath)
-
-    # List to store Artist objects
-    artist_collection = []
-    # Create Artist objects from data
-    for idx, artist in enumerate(artist_data[C.ARTISTS]):
-        artist_obj = Artist(artist, ast.literal_eval(artist_data[C.GENRES][idx]), artist_data[C.POPULARITY][idx], 
-                            artist_data[C.URI][idx])
-        artist_collection.append(artist_obj)
-    
-    # List to store Song objects
-    song_collection = []
-    # Create Song objects from data
-    for idx, song in enumerate(song_data[C.NAME]):
-        song_obj = Song(song, song_data[C.DURATION_MS][idx], song_data[C.EXPLICIT][idx], song_data[C.URI][idx],
-                        song_data[C.DANCEABILITY][idx], song_data[C.ENERGY][idx], song_data[C.KEY][idx], 
-                        song_data[C.SPEECHINESS][idx], song_data[C.ACOUSTICNESS][idx], song_data[C.INSTRUMENTALNESS][idx],
-                        song_data[C.VALENCE][idx], song_data[C.TEMPO][idx], [])
-        artist_uris = ast.literal_eval(song_data[C.ARTISTS][idx])
-        song_artists = []
-        # Match artists to Song objects
-        for artist_obj in artist_collection:
-            for artist_uri in artist_uris:
-                if artist_uri == artist_obj.uri:
-                    song_artists.append(artist_obj)
-        song_obj.artists = song_artists
-        song_collection.append(song_obj)
-    
-    # Return the list of Song and Artist objects
-    return song_collection
 
 # =========================================================================================================
 # =========================================================================================================
